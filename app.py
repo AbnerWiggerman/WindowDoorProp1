@@ -1,9 +1,9 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import os
 
 # Set your OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Set this in Streamlit Cloud secrets
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(page_title="Window & Door Proposal Generator", layout="centered")
 
@@ -39,7 +39,7 @@ for i, unit in enumerate(st.session_state.units):
 
 # Create proposal button
 if st.button("📄 Create Proposal"):
-    if not openai.api_key:
+    if not os.getenv("OPENAI_API_KEY"):
         st.error("Please set your OpenAI API key in Streamlit secrets.")
     elif not customer_name or not job_details or not st.session_state.units:
         st.warning("Please fill in all required fields and add at least one unit.")
@@ -59,7 +59,7 @@ if st.button("📄 Create Proposal"):
         prompt += "\nFocus on clarity, professionalism, and highlighting quality."
 
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a professional proposal writer."},
@@ -73,3 +73,4 @@ if st.button("📄 Create Proposal"):
 
         except Exception as e:
             st.error(f"Error generating proposal: {e}")
+
